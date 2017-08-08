@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://java.sun.com/xml/ns/javaee"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaeehttp://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+	id="WebApp_ID" version="3.0">
+
+	<display-name>Archetype Created Web Application</display-name>
+	<servlet>
+		<servlet-name>BenchmarkServlet</servlet-name>
+		<display-name>BenchmarkServlet</display-name>
+		<description></description>
+		<servlet-class>com.dinstone.async.tomcat.BenchmarkServlet
+		</servlet-class>
+	</servlet>
+	<servlet>
+		<servlet-name>AsyncTaskServlet</servlet-name>
+		<display-name>AsyncTaskServlet</display-name>
+		<description></description>
+		<servlet-class>com.dinstone.async.tomcat.AsyncTaskServlet
+		</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>BenchmarkServlet</servlet-name>
+		<url-pattern>/benchmark</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>AsyncTaskServlet</servlet-name>
+		<url-pattern>/asynctask</url-pattern>
+	</servlet-mapping>
+</web-app>
