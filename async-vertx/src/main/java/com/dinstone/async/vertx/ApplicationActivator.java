@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.dinstone.async.vertx.verticle.HttpServerVerticle;
+import com.dinstone.async.vertx.verticle.WorkerVerticle;
 
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
@@ -60,6 +61,9 @@ public class ApplicationActivator {
 		int instances = config.getInteger("http.verticle.instances", Runtime.getRuntime().availableProcessors());
 		DeploymentOptions hvOptions = new DeploymentOptions().setConfig(config).setInstances(instances);
 		VertxHelper.deployVerticle(vertx, hvOptions, HttpServerVerticle.class.getName());
+
+		DeploymentOptions wvOptions = new DeploymentOptions().setConfig(config).setWorker(true);
+		VertxHelper.deployVerticle(vertx, wvOptions, new WorkerVerticle());
 	}
 
 	public void stop() {

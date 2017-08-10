@@ -2,8 +2,11 @@ package com.dinstone.async.vertx.handler;
 
 import com.dinstone.async.vertx.util.HttpClientUtil;
 
+import io.vertx.core.CompositeFuture;
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClient;
 import io.vertx.ext.web.RoutingContext;
 
@@ -17,8 +20,64 @@ public class AsyncTaskHandler implements Handler<RoutingContext> {
 
 	@Override
 	public void handle(RoutingContext rc) {
-		sync(rc);
+		// sync(rc);
 		// async(rc);
+		multiAction(rc);
+	}
+
+	private void multiAction(RoutingContext rc) {
+		Future<Buffer> action2Future = asyncHttpCall("http://localhost:8180/async-vertx/404");
+		Future<Buffer> action1Future = asyncHttpCall("https://www.baidu.com/");
+
+		// all ok then result is ok,
+		CompositeFuture.all(action1Future, action2Future).setHandler(ar -> {
+			if (ar.succeeded()) {
+				System.out.println("very good,both ok");
+				for (Object element : ar.result().list()) {
+					System.out.println("result = " + element);
+				}
+				rc.response().end("processing is ok");
+			} else {
+				System.out.println("some one is failed");
+
+				CompositeFuture cf = (CompositeFuture) ar;
+				for (int i = 0; i < cf.size(); i++) {
+					if (cf.failed(i)) {
+						System.out.println(cf.cause(i));
+					} else {
+						System.out.println("i'm ok " + cf.resultAt(i));
+					}
+				}
+
+				rc.response().end("processing is failed");
+			}
+		});
+
+	}
+
+	private Future<Buffer> asyncHttpCall(String reqUrl) {
+		Future<Buffer> future = Future.future();
+
+		long s = System.currentTimeMillis();
+		httpClient.getAbs(reqUrl).handler(res -> {
+			if (res.statusCode() >= 400) {
+				future.fail(res.statusMessage());
+				return;
+			}
+
+			res.bodyHandler(buffer -> {
+				long e = System.currentTimeMillis();
+				System.out.println("access " + reqUrl + " take's " + (e - s) + "ms");
+
+				future.complete(buffer);
+			}).exceptionHandler(t -> {
+				future.fail(t);
+			});
+		}).exceptionHandler(t -> {
+			future.fail(t);
+		}).end();
+
+		return future;
 	}
 
 	private void async(RoutingContext rc) {

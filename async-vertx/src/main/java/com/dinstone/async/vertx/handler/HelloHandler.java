@@ -36,14 +36,19 @@ public class HelloHandler {
 	@Get("/g/:name")
 	@Produces({ "application/json" })
 	public void hello(RoutingContext ctx) {
-		String message = "Hello";
 		String name = ctx.request().getParam("name");
-		if (name != null) {
-			message += " " + name;
-		}
+		ctx.vertx().eventBus().send("hello", name, ar -> {
+			String message = null;
+			if (ar.succeeded()) {
+				message = (String) ar.result().body();
+			} else {
+				message = "error";
+			}
 
-		JsonObject json = new JsonObject().put("message", message);
-		ctx.response().end(json.encode());
+			JsonObject json = new JsonObject().put("message", message);
+			ctx.response().end(json.encode());
+		});
+
 	}
 
 	@Post("/p")
